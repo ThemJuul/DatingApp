@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using webapi.Entities;
+using WebApi.Entities;
 
-namespace webapi.Data;
+namespace WebApi.Data;
 
 public class DataContext(DbContextOptions options) : DbContext(options)
 {
