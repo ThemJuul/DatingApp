@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using WebApi.Data;
+using WebApi.Helpers;
 using WebApi.Interfaces;
 using WebApi.Services;
 
@@ -15,9 +17,13 @@ public static class ApplicationServiceExtensions
             opt.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
         });
         services.AddCors();
+
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPhotoService, PhotoService>();
+
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
 
         return services;
     }

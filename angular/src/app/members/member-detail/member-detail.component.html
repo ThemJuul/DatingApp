@@ -47,6 +47,9 @@
                 <tab heading="Photos" #photoTab="tab">
                     @if (photoTab.active) {
                         <gallery
+                            [thumbs]="true"
+                            [thumbPosition]="'bottom'"
+                            [itemAutosize]="true"
                             [items]="images"
                             class="gallery">
                         </gallery>

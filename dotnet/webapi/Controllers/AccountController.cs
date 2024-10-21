@@ -6,10 +6,11 @@ using WebApi.Data;
 using WebApi.Entities;
 using WebApi.DTOs;
 using WebApi.Interfaces;
+using WebApi.Extensions;
 
 namespace WebApi.Controllers;
 
-public class AccountController(DataContext dataContext, ITokenService tokenService) : BaseApiController
+public class AccountController(DataContext dataContext, ITokenService tokenService, IUserRepository userRepository) : BaseApiController
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> RegisterUser(RegisterUserDto registerUserDto)
@@ -43,8 +44,7 @@ public class AccountController(DataContext dataContext, ITokenService tokenServi
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await dataContext.Users.FirstOrDefaultAsync(user => 
-            user.UserName == loginDto.Username.ToLower());
+        var user = await userRepository.GetUserByUsernameAsync(loginDto.Username.ToLower());
 
         if(user is null)
         {
@@ -66,7 +66,8 @@ public class AccountController(DataContext dataContext, ITokenService tokenServi
         return new UserDto
         {
             Username = user.UserName,
-            Token = tokenService.CreateToken(user)
+            Token = tokenService.CreateToken(user),
+            PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
         };
     }
 
