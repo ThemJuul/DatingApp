@@ -4,6 +4,7 @@ using System.Security.Claims;
 using WebApi.DTOs;
 using WebApi.Entities;
 using WebApi.Extensions;
+using WebApi.Helpers;
 using WebApi.Interfaces;
 
 namespace WebApi.Controllers;
@@ -12,9 +13,12 @@ namespace WebApi.Controllers;
 public class UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
     {
-        var users = await userRepository.GetAllMembersAsync();
+        userParams.CurrentUsername = User.GetUsername();
+        var users = await userRepository.GetAllMembersAsync(userParams);
+
+        Response.AddPaginationHeader(users);
 
         return Ok(users);
     }
