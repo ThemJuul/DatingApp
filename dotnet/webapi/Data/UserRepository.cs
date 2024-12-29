@@ -46,7 +46,7 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
     public async Task<MemberDto?> GetMemberByUsernameAsync(string username)
     {
         return await dataContext.Users
-            .Where(x => x.UserName == username)
+            .Where(x => x.NormalizedUserName == username.ToUpper())
             .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }

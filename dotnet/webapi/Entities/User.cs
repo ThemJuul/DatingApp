@@ -1,13 +1,10 @@
-﻿using WebApi.Extensions;
+﻿using Microsoft.AspNetCore.Identity;
+using WebApi.Extensions;
 
 namespace WebApi.Entities;
 
-public class User
+public class User : IdentityUser<int>
 {
-    public int Id { get; set; }
-    public required string UserName { get; set; }
-    public byte[] PasswordHash { get; set; } = [];
-    public byte[] PasswordSalt { get; set; } = [];
     public DateOnly DateOfBirth { get; set; }
     public required string KnownAs { get; set; }
     public DateTime Created { get; set; } = DateTime.UtcNow;
@@ -23,6 +20,7 @@ public class User
     public List<UserLike> LikedUsers { get; set; } = [];
     public List<Message> MessagesSent { get; set; } = [];
     public List<Message> MessagesReceived { get; set; } = [];
+    public ICollection<AppUserRole> UserRoles { get; set; } = [];
 
     public int GetAge()
     {

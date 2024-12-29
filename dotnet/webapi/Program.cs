@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
+using WebApi.Entities;
 using WebApi.Extensions;
 using WebApi.Middleware;
 
@@ -30,9 +32,11 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<DataContext>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
     await context.Database.MigrateAsync();
-    await Seeder.SeedUsers(context);
+    await Seeder.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
 {
