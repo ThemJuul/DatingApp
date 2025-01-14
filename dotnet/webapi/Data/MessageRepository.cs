@@ -46,13 +46,10 @@ public class MessageRepository(DataContext dataContext, IMapper mapper) : IMessa
     public async Task<IEnumerable<MessageDto>> GetMessageThreadAsync(string currentUsername, string recipientUsername)
     {
         var messages = await dataContext.Messages
-            .Include(x => x.Sender)
-                .ThenInclude(x => x.Photos)
-            .Include(x => x.Recipient)
-                .ThenInclude(x => x.Photos)
             .Where(x => x.RecipientUsername == currentUsername && x.RecipientDeleted == false && x.SenderUsername == recipientUsername ||
                     x.SenderUsername == currentUsername && x.SenderDeleted == false && x.RecipientUsername == recipientUsername)
             .OrderBy(x => x.MessageSent)
+            .ProjectTo<MessageDto>(mapper.ConfigurationProvider)
             .ToListAsync();
 
         var unreadMessages = messages.Where(x => x.DateRead == null && x.RecipientUsername == currentUsername).ToList();
@@ -67,11 +64,38 @@ public class MessageRepository(DataContext dataContext, IMapper mapper) : IMessa
             await dataContext.SaveChangesAsync();
         }
 
-        return mapper.Map<IEnumerable<MessageDto>>(messages);
+        return messages;
     }
 
     public async Task<bool> SaveAllAsync()
     {
         return await dataContext.SaveChangesAsync() > 0;
+    }
+
+    void IMessageRepository.AddGroup(Group group)
+    {
+        dataContext.Groups.Add(group);
+    }
+
+    async Task<Connection?> IMessageRepository.GetConnectionAsync(string connectionId)
+    {
+        return await dataContext.Connections.FindAsync(connectionId);
+    }
+
+    async Task<Group?> IMessageRepository.GetGroupForConnection(string connectionId)
+    {
+        return await dataContext.Groups.Include(x => x.Connections).Where(x => x.Connections.Any(c => c.ConnectionId == connectionId)).FirstOrDefaultAsync();
+    }
+
+    async Task<Group?> IMessageRepository.GetMessageGroupAsync(string groupName)
+    {
+        return await dataContext.Groups
+            .Include(x => x.Connections)
+            .FirstOrDefaultAsync(x => x.Name == groupName);
+    }
+
+    void IMessageRepository.RemoveConnection(Connection connection)
+    {
+        dataContext.Connections.Remove(connection);
     }
 }

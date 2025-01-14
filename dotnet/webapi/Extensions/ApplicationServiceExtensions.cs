@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using WebApi.Data;
 using WebApi.Helpers;
 using WebApi.Interfaces;
 using WebApi.Services;
+using WebApi.SignalR;
 
 namespace WebApi.Extensions;
 
@@ -25,7 +25,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<LogUserActivity>();
 
+        services.AddSingleton<PresenceTracker>();
+
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+        services.AddSignalR();
         services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
 
         return services;
