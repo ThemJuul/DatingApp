@@ -16,7 +16,7 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
 
         query = query.Where(x => x.UserName != userParams.CurrentUsername);
 
-        if(userParams.Gender != null)
+        if (userParams.Gender != null)
         {
             query = query.Where(x => x.Gender == userParams.Gender);
         }
@@ -61,11 +61,6 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
         return await dataContext.Users
             .Include(x => x.Photos)
             .SingleOrDefaultAsync(x => x.UserName == username);
-    }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await dataContext.SaveChangesAsync() > 0;
     }
 
     public void Update(User user)

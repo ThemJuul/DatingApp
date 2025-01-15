@@ -1,19 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApi.Entities;
-using WebApi.DTOs;
-using WebApi.Interfaces;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApi.DTOs;
+using WebApi.Entities;
+using WebApi.Interfaces;
 
 namespace WebApi.Controllers;
 
-public class AccountController(UserManager<User> userManager, ITokenService tokenService, IUserRepository userRepository, IMapper mapper) : BaseApiController
+public class AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper) : BaseApiController
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> RegisterUser(RegisterUserDto registerUserDto)
     {
-        if(await UserExists(registerUserDto.Username))
+        if (await UserExists(registerUserDto.Username))
         {
             return BadRequest("Username is taken.");
         }
@@ -43,7 +43,7 @@ public class AccountController(UserManager<User> userManager, ITokenService toke
             .Include(p => p.Photos)
             .FirstOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
-        if(user is null || user.UserName == null)
+        if (user is null || user.UserName == null)
         {
             return Unauthorized("Invalid username! or password.");
         }

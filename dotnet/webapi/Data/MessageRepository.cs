@@ -45,14 +45,13 @@ public class MessageRepository(DataContext dataContext, IMapper mapper) : IMessa
 
     public async Task<IEnumerable<MessageDto>> GetMessageThreadAsync(string currentUsername, string recipientUsername)
     {
-        var messages = await dataContext.Messages
+        var query = dataContext.Messages
             .Where(x => x.RecipientUsername == currentUsername && x.RecipientDeleted == false && x.SenderUsername == recipientUsername ||
                     x.SenderUsername == currentUsername && x.SenderDeleted == false && x.RecipientUsername == recipientUsername)
             .OrderBy(x => x.MessageSent)
-            .ProjectTo<MessageDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsQueryable();
 
-        var unreadMessages = messages.Where(x => x.DateRead == null && x.RecipientUsername == currentUsername).ToList();
+        var unreadMessages = query.Where(x => x.DateRead == null && x.RecipientUsername == currentUsername).ToList();
 
         if (unreadMessages.Count != 0)
         {
@@ -60,16 +59,9 @@ public class MessageRepository(DataContext dataContext, IMapper mapper) : IMessa
             {
                 message.DateRead = DateTime.UtcNow;
             }
-
-            await dataContext.SaveChangesAsync();
         }
 
-        return messages;
-    }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await dataContext.SaveChangesAsync() > 0;
+        return await query.ProjectTo<MessageDto>(mapper.ConfigurationProvider).ToListAsync();
     }
 
     void IMessageRepository.AddGroup(Group group)

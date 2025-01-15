@@ -10,7 +10,7 @@ using WebApi.Interfaces;
 namespace WebApi.Controllers;
 
 [Authorize]
-public class MessagesController(IMessageRepository messageRepository, IUserRepository userRepository, IMapper mapper) : BaseApiController
+public class MessagesController(IUnitOfWork unitOfWork, IMapper mapper) : BaseApiController
 {
     [HttpPost]
     public async Task<ActionResult<MessageDto>> CreateMessage(CreateMessageDto createMessageDto)
@@ -22,8 +22,8 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
             return BadRequest("You cannot message yourself.");
         }
 
-        var sender = await userRepository.GetUserByUsernameAsync(username);
-        var recipient = await userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
+        var sender = await unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+        var recipient = await unitOfWork.UserRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
         if (recipient == null || sender == null || sender.UserName == null || recipient.UserName == null)
         {
@@ -39,9 +39,9 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
             Content = createMessageDto.Content
         };
 
-        messageRepository.AddMessage(message);
+        unitOfWork.MessageRepository.AddMessage(message);
 
-        if (await messageRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return Ok(mapper.Map<MessageDto>(message));
         }
@@ -50,11 +50,11 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessagesForUser([FromQuery]MessageParams messageParams)
+    public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessagesForUser([FromQuery] MessageParams messageParams)
     {
         messageParams.Username = User.GetUsername();
 
-        var messages = await messageRepository.GetAllMessagesForUserAsync(messageParams);
+        var messages = await unitOfWork.MessageRepository.GetAllMessagesForUserAsync(messageParams);
 
         Response.AddPaginationHeader(messages);
 
@@ -66,7 +66,7 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
     {
         var currentUsername = User.GetUsername();
 
-        return Ok(await messageRepository.GetMessageThreadAsync(currentUsername, username));
+        return Ok(await unitOfWork.MessageRepository.GetMessageThreadAsync(currentUsername, username));
     }
 
     [HttpDelete("{id}")]
@@ -74,7 +74,7 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
     {
         var username = User.GetUsername();
 
-        var message = await messageRepository.GetMessageAsync(id);
+        var message = await unitOfWork.MessageRepository.GetMessageAsync(id);
 
         if (message == null)
         {
@@ -99,12 +99,12 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
             message.RecipientDeleted = true;
         }
 
-        if (message is {SenderDeleted: true, RecipientDeleted: true})
+        if (message is { SenderDeleted: true, RecipientDeleted: true })
         {
-            messageRepository.DeleteMessage(message);
+            unitOfWork.MessageRepository.DeleteMessage(message);
         }
 
-        if (await messageRepository.SaveAllAsync())
+        if (await unitOfWork.Complete())
         {
             return Ok();
         }
