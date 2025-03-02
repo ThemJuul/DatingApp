@@ -26,7 +26,9 @@ public class UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoServi
     [HttpGet("{username}")]
     public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
-        var user = await unitOfWork.UserRepository.GetMemberByUsernameAsync(username);
+        var currentUser = User.GetUsername();
+
+        var user = await unitOfWork.UserRepository.GetMemberByUsernameAsync(username, currentUser.ToLower() == username.ToLower());
 
         if (user == null)
         {
@@ -79,11 +81,6 @@ public class UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoServi
             PublicId = result.PublicId
         };
 
-        if (user.Photos.Count == 0)
-        {
-            photo.IsMain = true;
-        }
-
         user.Photos.Add(photo);
 
         if (await unitOfWork.Complete())
@@ -107,7 +104,7 @@ public class UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoServi
 
         var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
-        if (photo == null || photo.IsMain)
+        if (photo == null || photo.IsMain || !photo.IsApproved)
         {
             return BadRequest("Cannot use this as main photo.");
         }

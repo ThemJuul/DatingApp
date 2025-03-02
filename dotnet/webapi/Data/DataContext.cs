@@ -12,6 +12,7 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<User, App
     public DbSet<Message> Messages { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<Connection> Connections { get; set; }
+    public DbSet<Photo> Photos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +23,11 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<User, App
             .WithOne(u => u.User)
             .HasForeignKey(ur => ur.UserId)
             .IsRequired();
+
+        //modelBuilder.Entity<User>()
+        //    .HasMany(x => x.Photos)
+        //    .WithOne(x => x.User)
+        //    .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<AppRole>()
             .HasMany(ur => ur.UserRoles)
@@ -53,5 +59,7 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<User, App
             .HasOne(x => x.Sender)
             .WithMany(x => x.MessagesSent)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Photo>().HasQueryFilter(x => x.IsApproved);
     }
 }

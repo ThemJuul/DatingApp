@@ -43,12 +43,16 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
             .ToListAsync();
     }
 
-    public async Task<MemberDto?> GetMemberByUsernameAsync(string username)
+    public async Task<MemberDto?> GetMemberByUsernameAsync(string username, bool isCurrentUser)
     {
-        return await dataContext.Users
+        var query = dataContext.Users
             .Where(x => x.NormalizedUserName == username.ToUpper())
             .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync();
+            .AsQueryable();
+
+        query = isCurrentUser ? query.IgnoreQueryFilters() : query;
+
+        return await query.FirstOrDefaultAsync();
     }
 
     public async Task<User?> GetUserByIdAsync(int id)

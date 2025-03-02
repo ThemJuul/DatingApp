@@ -11,7 +11,7 @@ import { RolesModalComponent } from '../../modals/roles-modal/roles-modal.compon
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css'
 })
-export class UserManagementComponent implements OnInit{
+export class UserManagementComponent implements OnInit {
   private adminService = inject(AdminService);
   private modelService = inject(BsModalService);
   users: User[] = [];

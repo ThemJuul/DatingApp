@@ -1,1 +1,33 @@
-<p>photo-management works!</p>
+<div class="row">
+    @if (photos.length === 0) {
+      <h3>No photos to moderate</h3>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Photo</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (photo of photos; track photo.id) {
+            <tr>
+              <td>{{photo.username}}</td>
+              <td>
+                <img src="{{photo.url}}" alt="user photo" class="img-thumbnail" style="max-height: 100px;">
+              </td>
+              <td>
+                <button class="btn btn-success me-2" (click)="approvePhoto(photo.id)">
+                  Approve
+                </button>
+                <button class="btn btn-danger" (click)="rejectPhoto(photo.id)">
+                  Reject
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>

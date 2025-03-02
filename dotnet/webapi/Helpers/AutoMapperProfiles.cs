@@ -18,6 +18,8 @@ public class AutoMapperProfiles : Profile
                     s.Photos.FirstOrDefault(x =>
                         x.IsMain)!.Url));
         CreateMap<Photo, PhotoDto>();
+        CreateMap<Photo, PhotoForModerationDto>()
+            .ForMember(p => p.Username, o => o.MapFrom(src => src.User.UserName));
         CreateMap<MemberUpdateDto, User>();
         CreateMap<RegisterUserDto, User>();
         CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
