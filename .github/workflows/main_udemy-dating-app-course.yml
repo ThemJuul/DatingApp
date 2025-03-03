@@ -28,7 +28,7 @@ jobs:
         working-directory: dotnet
 
       - name: dotnet publish
-        run: dotnet publish dotnet/webapi/YourProjectName.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish dotnet/webapi/webapi.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
