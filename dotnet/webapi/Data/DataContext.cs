@@ -24,11 +24,6 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<User, App
             .HasForeignKey(ur => ur.UserId)
             .IsRequired();
 
-        //modelBuilder.Entity<User>()
-        //    .HasMany(x => x.Photos)
-        //    .WithOne(x => x.User)
-        //    .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<AppRole>()
             .HasMany(ur => ur.UserRoles)
             .WithOne(u => u.Role)
@@ -48,7 +43,7 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<User, App
             .HasOne(s => s.TargetUser)
             .WithMany(l => l.LikedByUsers)
             .HasForeignKey(s => s.TargetUserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Message>()
             .HasOne(x => x.Recipient)
